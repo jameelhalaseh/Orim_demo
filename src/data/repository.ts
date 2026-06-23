@@ -13,7 +13,7 @@ import type {
 } from '../types'
 import type { Fils } from '../lib/money'
 import { CATEGORIES } from './categories'
-import { seedMovements, seedProducts } from './seed'
+import { seedActivity, seedMovements, seedProducts } from './seed'
 
 // ---------------------------------------------------------------------------
 // In-memory store.
@@ -25,12 +25,14 @@ import { seedMovements, seedProducts } from './seed'
 // UI change.
 // ---------------------------------------------------------------------------
 const products: Product[] = seedProducts()
-const movements: StockMovement[] = seedMovements()
-const orders: Order[] = []
+const seededActivity = seedActivity()
+const movements: StockMovement[] = [...seedMovements(), ...seededActivity.movements]
+const orders: Order[] = seededActivity.orders
 
 let movementSeq = movements.length
-let orderSeq = 0
+let orderSeq = orders.length
 let transferSeq = 0
+let productSeq = 0
 
 function nextMovementId(): string {
   return `mv-${++movementSeq}`
@@ -93,6 +95,17 @@ export interface CreateOrderInput {
   deliveryFee?: Fils
 }
 
+export interface CreateProductInput {
+  name: string
+  category: Category
+  description?: string
+  price: Fils
+  cost: Fils
+  reorderThreshold: number
+  initialStock: number
+  image?: string
+}
+
 export interface ProductStock {
   total: number
   byLocation: Record<Location, number>
@@ -103,6 +116,7 @@ export interface Repository {
   getProducts(filter?: { category?: Category }): Product[]
   getProduct(id: string): Product | undefined
   getCategories(): CategoryMeta[]
+  createProduct(input: CreateProductInput): Product
   getStock(sku: string, location?: Location): number
   getProductStock(productId: string): ProductStock
   recordStockMovement(input: MovementInput): StockMovement
@@ -158,6 +172,39 @@ export const repository: Repository = {
 
   getCategories() {
     return [...CATEGORIES]
+  },
+
+  createProduct(input) {
+    const seq = ++productSeq
+    const id = `custom-${seq}`
+    const sku = `CUST-${String(seq).padStart(3, '0')}`
+    const product: Product = {
+      id,
+      sku,
+      name: input.name,
+      category: input.category,
+      description: input.description ?? '',
+      price: input.price,
+      cost: input.cost,
+      image:
+        input.image ||
+        `https://placehold.co/800x800/f5f5f4/c53735?text=${encodeURIComponent(input.name)}&font=montserrat`,
+      reorderThreshold: input.reorderThreshold,
+    }
+    products.push(product)
+
+    if (input.initialStock > 0) {
+      this.recordStockMovement({
+        productId: id,
+        sku,
+        reason: 'restock',
+        quantity: input.initialStock,
+        location: 'warehouse',
+        note: 'Initial stock',
+      })
+    }
+
+    return product
   },
 
   getStock(sku, location) {

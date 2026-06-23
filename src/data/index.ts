@@ -8,6 +8,7 @@ export type {
   TransferInput,
   OrderLineInput,
   CreateOrderInput,
+  CreateProductInput,
   ProductStock,
 } from './repository'
 export { CATEGORIES } from './categories'
