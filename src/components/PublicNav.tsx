@@ -5,6 +5,7 @@ import { useCart } from '../context/CartContext'
 const links = [
   { label: 'Home', to: '/' },
   { label: 'Shop', to: '/shop' },
+  { label: 'Design', to: '/custom' },
 ]
 
 export default function PublicNav() {

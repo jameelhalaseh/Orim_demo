@@ -21,10 +21,16 @@ export interface CartItem {
   maxStock: number // available stock when added (caps the quantity stepper)
 }
 
+export interface CustomDesign {
+  previewImage: string // data URL of the design thumbnail
+  label?: string // e.g. "Custom · White / M"
+}
+
 export interface AddItemInput {
   productId: string
   variantId?: string
   quantity?: number
+  custom?: CustomDesign
 }
 
 interface CartContextValue {
@@ -46,17 +52,21 @@ function lineKey(productId: string, variantId?: string): string {
   return variantId ? `${productId}:${variantId}` : productId
 }
 
+// Each custom (made-to-order) design is a distinct cart line, so we never merge them.
+let customLineSeq = 0
+
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([])
   const [isOpen, setIsOpen] = useState(false)
 
-  function addItem({ productId, variantId, quantity = 1 }: AddItemInput) {
+  function addItem({ productId, variantId, quantity = 1, custom }: AddItemInput) {
     const product = repository.getProduct(productId)
     if (!product) return
 
     let unitPrice = product.price
     let sku = product.sku
     let variantLabel: string | undefined
+    let image = product.image
     if (variantId) {
       const variant = product.variants?.find((v) => v.id === variantId)
       if (!variant) return
@@ -67,8 +77,30 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
     const maxStock = repository.getStock(sku)
     const cap = maxStock > 0 ? maxStock : Number.MAX_SAFE_INTEGER
-    const key = lineKey(productId, variantId)
 
+    // Custom designs never merge — each is its own line — and carry the design preview.
+    if (custom) {
+      const key = `${lineKey(productId, variantId)}:custom-${++customLineSeq}`
+      setItems((prev) => [
+        ...prev,
+        {
+          key,
+          productId,
+          variantId,
+          name: product.name,
+          variantLabel: custom.label ?? variantLabel,
+          image: custom.previewImage || image,
+          unitPrice,
+          quantity: Math.min(quantity, cap),
+          isCustom: true,
+          maxStock,
+        },
+      ])
+      setIsOpen(true)
+      return
+    }
+
+    const key = lineKey(productId, variantId)
     setItems((prev) => {
       const existing = prev.find((i) => i.key === key)
       if (existing) {
@@ -83,10 +115,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
           variantId,
           name: product.name,
           variantLabel,
-          image: product.image,
+          image,
           unitPrice,
           quantity: Math.min(quantity, cap),
-          isCustom: product.madeToOrder,
           maxStock,
         },
       ]

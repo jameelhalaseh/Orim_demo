@@ -186,9 +186,12 @@ export default function ProductPage() {
           </button>
 
           {product.madeToOrder && (
-            <p className="mt-3 text-xs text-neutral-400">
-              Made to order — personalise this blank in the custom designer (coming soon).
-            </p>
+            <Link
+              to="/custom"
+              className="mt-4 inline-flex items-center gap-2 rounded-full border border-[#C53735] px-5 py-2.5 text-sm font-medium text-[#C53735] transition-colors hover:bg-[#C53735]/5"
+            >
+              Design your own →
+            </Link>
           )}
         </div>
       </div>

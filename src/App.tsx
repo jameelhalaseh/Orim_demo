@@ -6,6 +6,7 @@ import ShopPage from './pages/ShopPage'
 import ProductPage from './pages/ProductPage'
 import CartPage from './pages/CartPage'
 import CheckoutPage from './pages/CheckoutPage'
+import CustomTeePage from './pages/CustomTeePage'
 import AdminLayout from './pages/admin/AdminLayout'
 import DashboardPage from './pages/admin/DashboardPage'
 import InventoryPage from './pages/admin/InventoryPage'
@@ -23,6 +24,7 @@ export default function App() {
           {/* Public shop (shared nav + cart drawer) */}
           <Route element={<PublicLayout />}>
             <Route path="/shop" element={<ShopPage />} />
+            <Route path="/custom" element={<CustomTeePage />} />
             <Route path="/product/:id" element={<ProductPage />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
