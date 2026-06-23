@@ -1,10 +1,12 @@
 import { useSearchParams } from 'react-router-dom'
 import type { Category } from '../types'
 import { repository } from '../data'
+import { useI18n } from '../lib/i18n'
 import ProductCard from '../components/ProductCard'
 
 export default function ShopPage() {
   const [params, setParams] = useSearchParams()
+  const { t } = useI18n()
   const categories = repository.getCategories()
 
   const requested = params.get('category')
@@ -19,19 +21,19 @@ export default function ShopPage() {
   return (
     <main className="mx-auto max-w-6xl px-5 py-10 sm:py-14">
       <header className="mb-8">
-        <h1 className="text-3xl font-medium tracking-tight text-neutral-900 sm:text-4xl">Shop</h1>
-        <p className="mt-2 max-w-xl text-sm leading-relaxed text-neutral-500">
-          Encouraging gifts for the people you love — free delivery across Amman &amp; Beirut.
-        </p>
+        <h1 className="text-3xl font-medium tracking-tight text-neutral-900 sm:text-4xl">
+          {t('shop.title')}
+        </h1>
+        <p className="mt-2 max-w-xl text-sm leading-relaxed text-neutral-500">{t('shop.subtitle')}</p>
       </header>
 
       {/* Category filter */}
       <div className="mb-8 flex flex-wrap gap-2">
-        <FilterChip label="All" active={active === null} onClick={() => selectCategory(null)} />
+        <FilterChip label={t('shop.all')} active={active === null} onClick={() => selectCategory(null)} />
         {categories.map((c) => (
           <FilterChip
             key={c.id}
-            label={c.label}
+            label={t(`cat.${c.id}`)}
             active={active === c.id}
             onClick={() => selectCategory(c.id)}
           />
@@ -40,7 +42,7 @@ export default function ShopPage() {
 
       {/* Grid */}
       {products.length === 0 ? (
-        <p className="py-16 text-center text-sm text-neutral-500">No products in this category yet.</p>
+        <p className="py-16 text-center text-sm text-neutral-500">{t('shop.empty')}</p>
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {products.map((product) => (

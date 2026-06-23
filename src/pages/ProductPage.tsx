@@ -4,6 +4,7 @@ import { ArrowLeft, Minus, Plus, Check } from 'lucide-react'
 import { repository } from '../data'
 import { formatJOD } from '../lib/money'
 import { useCart } from '../context/CartContext'
+import { useI18n } from '../lib/i18n'
 import StockBadge from '../components/StockBadge'
 
 function unique<T>(values: (T | undefined)[]): T[] {
@@ -14,6 +15,7 @@ export default function ProductPage() {
   const { id } = useParams<{ id: string }>()
   const product = id ? repository.getProduct(id) : undefined
   const { addItem } = useCart()
+  const { t } = useI18n()
 
   const variants = product?.variants ?? []
   const colors = unique(variants.map((v) => v.color))
@@ -27,9 +29,9 @@ export default function ProductPage() {
   if (!product) {
     return (
       <main className="mx-auto max-w-6xl px-5 py-24 text-center">
-        <h1 className="text-2xl font-medium text-neutral-900">Product not found</h1>
+        <h1 className="text-2xl font-medium text-neutral-900">{t('product.notFound')}</h1>
         <Link to="/shop" className="mt-4 inline-block text-sm font-medium text-[#C53735] hover:underline">
-          Back to shop
+          {t('product.back')}
         </Link>
       </main>
     )
@@ -66,7 +68,7 @@ export default function ProductPage() {
         className="mb-6 inline-flex items-center gap-1.5 text-sm text-neutral-500 transition-colors hover:text-neutral-900"
       >
         <ArrowLeft size={16} />
-        Back to shop
+        {t('product.back')}
       </Link>
 
       <div className="grid gap-8 lg:grid-cols-2">
@@ -88,7 +90,7 @@ export default function ProductPage() {
           {colors.length > 0 && (
             <div className="mt-6">
               <p className="mb-2 text-xs font-medium uppercase tracking-wide text-neutral-500">
-                Colour: <span className="text-neutral-900">{color}</span>
+                {t('product.colour')}: <span className="text-neutral-900">{t(`colour.${color}`)}</span>
               </p>
               <div className="flex flex-wrap gap-2">
                 {colors.map((c) => (
@@ -102,7 +104,7 @@ export default function ProductPage() {
                         : 'border-neutral-300 text-neutral-700 hover:border-neutral-900'
                     }`}
                   >
-                    {c}
+                    {t(`colour.${c}`)}
                   </button>
                 ))}
               </div>
@@ -113,7 +115,7 @@ export default function ProductPage() {
           {sizes.length > 0 && (
             <div className="mt-5">
               <p className="mb-2 text-xs font-medium uppercase tracking-wide text-neutral-500">
-                Size: <span className="text-neutral-900">{size}</span>
+                {t('product.size')}: <span className="text-neutral-900">{size}</span>
               </p>
               <div className="flex flex-wrap gap-2">
                 {sizes.map((s) => {
@@ -161,7 +163,7 @@ export default function ProductPage() {
               </button>
             </div>
             <span className="text-sm text-neutral-500">
-              {available > 0 ? `${available} available` : 'Currently unavailable'}
+              {available > 0 ? t('product.available', { n: available }) : t('product.unavailable')}
             </span>
           </div>
 
@@ -174,14 +176,14 @@ export default function ProductPage() {
           >
             {added ? (
               <>
-                <Check size={18} /> Added to cart
+                <Check size={18} /> {t('product.added')}
               </>
             ) : needsSelection ? (
-              'Select options'
+              t('product.select')
             ) : available <= 0 ? (
-              'Sold out'
+              t('product.soldOut')
             ) : (
-              'Add to cart'
+              t('product.add')
             )}
           </button>
 
@@ -190,7 +192,7 @@ export default function ProductPage() {
               to="/custom"
               className="mt-4 inline-flex items-center gap-2 rounded-full border border-[#C53735] px-5 py-2.5 text-sm font-medium text-[#C53735] transition-colors hover:bg-[#C53735]/5"
             >
-              Design your own →
+              {t('product.design')} →
             </Link>
           )}
         </div>

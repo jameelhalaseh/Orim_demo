@@ -4,6 +4,7 @@ import { AlertTriangle, Check, Trash2, Upload } from 'lucide-react'
 import { repository } from '../data'
 import { formatJOD } from '../lib/money'
 import { useCart } from '../context/CartContext'
+import { useI18n } from '../lib/i18n'
 
 const BLANK_ID = 'tee-blank-custom'
 
@@ -37,6 +38,7 @@ function clamp(v: number, lo: number, hi: number): number {
 
 export default function CustomTeePage() {
   const { addItem } = useCart()
+  const { t } = useI18n()
   const product = repository.getProduct(BLANK_ID)
 
   const variants = product?.variants ?? []
@@ -165,7 +167,7 @@ export default function CustomTeePage() {
       quantity: 1,
       custom: {
         previewImage: makeThumbnail(),
-        label: `Custom · ${color} / ${size}`,
+        label: `${t('custom.word')} · ${t(`colour.${color}`)} / ${size}`,
       },
     })
     setAdded(true)
@@ -176,12 +178,9 @@ export default function CustomTeePage() {
     <main className="mx-auto max-w-6xl px-5 py-10 sm:py-14">
       <header className="mb-8">
         <h1 className="text-3xl font-medium tracking-tight text-neutral-900 sm:text-4xl">
-          Design your tee
+          {t('custom.title')}
         </h1>
-        <p className="mt-2 max-w-xl text-sm leading-relaxed text-neutral-500">
-          Choose a colour, upload your artwork, then drag and scale it onto the chest. Made to order
-          — free delivery across Amman &amp; Beirut.
-        </p>
+        <p className="mt-2 max-w-xl text-sm leading-relaxed text-neutral-500">{t('custom.subtitle')}</p>
       </header>
 
       <div className="grid gap-8 lg:grid-cols-2">
@@ -246,7 +245,7 @@ export default function CustomTeePage() {
                 style={{ left: PRINT.x, top: PRINT.y, width: PRINT.w, height: PRINT.h }}
               >
                 <Upload size={18} />
-                <span className="mt-1 px-2">Your art appears here</span>
+                <span className="mt-1 px-2">{t('custom.artHere')}</span>
               </div>
             )}
           </div>
@@ -256,14 +255,14 @@ export default function CustomTeePage() {
         <div>
           {/* Colour */}
           <p className="mb-2 text-xs font-medium uppercase tracking-wide text-neutral-500">
-            Shirt colour: <span className="text-neutral-900">{color}</span>
+            {t('custom.colour')}: <span className="text-neutral-900">{t(`colour.${color}`)}</span>
           </p>
           <div className="mb-5 flex gap-2">
             {colors.map((c) => (
               <button
                 key={c}
                 type="button"
-                aria-label={c}
+                aria-label={t(`colour.${c}`)}
                 onClick={() => setColor(c)}
                 className={`h-9 w-9 rounded-full border-2 transition-transform ${
                   color === c ? 'scale-110 border-[#C53735]' : 'border-neutral-300'
@@ -275,7 +274,7 @@ export default function CustomTeePage() {
 
           {/* Size */}
           <p className="mb-2 text-xs font-medium uppercase tracking-wide text-neutral-500">
-            Size: <span className="text-neutral-900">{size}</span>
+            {t('custom.size')}: <span className="text-neutral-900">{size}</span>
           </p>
           <div className="mb-5 flex flex-wrap gap-2">
             {sizes.map((s) => (
@@ -297,7 +296,7 @@ export default function CustomTeePage() {
           {/* Upload */}
           <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-neutral-300 px-4 py-2.5 text-sm font-medium text-neutral-700 transition-colors hover:border-neutral-900">
             <Upload size={16} />
-            {artSrc ? 'Replace artwork' : 'Upload artwork'}
+            {artSrc ? t('custom.replace') : t('custom.upload')}
             <input type="file" accept="image/*" onChange={handleFile} className="sr-only" />
           </label>
           {artSrc && (
@@ -306,7 +305,7 @@ export default function CustomTeePage() {
               onClick={reset}
               className="ml-2 inline-flex items-center gap-1.5 rounded-full px-3 py-2.5 text-sm text-neutral-500 transition-colors hover:text-[#C53735]"
             >
-              <Trash2 size={15} /> Remove
+              <Trash2 size={15} /> {t('custom.remove')}
             </button>
           )}
 
@@ -314,7 +313,7 @@ export default function CustomTeePage() {
           {artSrc && (
             <div className="mt-5">
               <label htmlFor="scale" className="mb-1 block text-xs font-medium text-neutral-500">
-                Size on chest
+                {t('custom.scale')}
               </label>
               <input
                 id="scale"
@@ -336,14 +335,11 @@ export default function CustomTeePage() {
               {lowRes ? (
                 <p className="inline-flex items-start gap-1.5 rounded-lg bg-amber-50 px-3 py-2 text-amber-700">
                   <AlertTriangle size={14} className="mt-px shrink-0" />
-                  <span>
-                    Low resolution for this print size — your image is {natural.w}px wide; we
-                    recommend ≥ {requiredPx}px. It may look blurry when printed.
-                  </span>
+                  <span>{t('custom.lowRes', { w: natural.w, req: requiredPx })}</span>
                 </p>
               ) : (
                 <p className="inline-flex items-center gap-1.5 text-emerald-600">
-                  <Check size={14} /> Resolution looks good ({natural.w}×{natural.h}px).
+                  <Check size={14} /> {t('custom.goodRes', { w: natural.w, h: natural.h })}
                 </p>
               )}
             </div>
@@ -356,7 +352,7 @@ export default function CustomTeePage() {
                 {formatJOD(product.price)}
               </span>
               <span className="text-sm text-neutral-500">
-                {available > 0 ? `${available} blanks available` : 'Out of stock'}
+                {available > 0 ? t('custom.blanks', { n: available }) : t('custom.outOfStock')}
               </span>
             </div>
             <button
@@ -367,18 +363,18 @@ export default function CustomTeePage() {
             >
               {added ? (
                 <>
-                  <Check size={18} /> Added to cart
+                  <Check size={18} /> {t('custom.added')}
                 </>
               ) : !artSrc ? (
-                'Upload artwork to continue'
+                t('custom.uploadFirst')
               ) : available <= 0 ? (
-                'Out of stock'
+                t('custom.outOfStock')
               ) : (
-                'Add made-to-order tee'
+                t('custom.add')
               )}
             </button>
             <p className="mt-3 text-xs text-neutral-400">
-              Made to order — each custom tee is printed on an Orim blank ({selectedVariant?.sku}).
+              {t('custom.note', { sku: selectedVariant?.sku ?? '' })}
             </p>
           </div>
         </div>

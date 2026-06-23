@@ -1,3 +1,5 @@
+import { useI18n } from '../lib/i18n'
+
 type StockBadgeProps = {
   total: number
   threshold: number
@@ -5,14 +7,15 @@ type StockBadgeProps = {
 }
 
 export default function StockBadge({ total, threshold, className = '' }: StockBadgeProps) {
-  let label = 'In stock'
+  const { t } = useI18n()
+  let label = t('stock.in')
   let tone = 'bg-emerald-50 text-emerald-700 ring-emerald-600/20'
 
   if (total <= 0) {
-    label = 'Out of stock'
+    label = t('stock.out')
     tone = 'bg-neutral-100 text-neutral-500 ring-neutral-500/20'
   } else if (total <= threshold) {
-    label = 'Low stock'
+    label = t('stock.low')
     tone = 'bg-amber-50 text-amber-700 ring-amber-600/20'
   }
 

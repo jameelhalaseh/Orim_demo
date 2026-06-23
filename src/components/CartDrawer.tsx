@@ -2,10 +2,12 @@ import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Minus, Plus, ShoppingBag, Trash2, X } from 'lucide-react'
 import { useCart } from '../context/CartContext'
+import { useI18n } from '../lib/i18n'
 import { formatJOD } from '../lib/money'
 
 export default function CartDrawer() {
   const { items, isOpen, closeCart, subtotal, count, updateQty, removeItem } = useCart()
+  const { t } = useI18n()
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -44,11 +46,14 @@ export default function CartDrawer() {
         <header className="flex items-center justify-between border-b border-neutral-200 px-5 py-4">
           <div className="flex items-center gap-2">
             <ShoppingBag size={18} className="text-[#C53735]" />
-            <h2 className="text-sm font-medium">Your cart{count > 0 ? ` (${count})` : ''}</h2>
+            <h2 className="text-sm font-medium">
+              {t('cart.title')}
+              {count > 0 ? ` (${count})` : ''}
+            </h2>
           </div>
           <button
             onClick={closeCart}
-            aria-label="Close cart"
+            aria-label={t('cart.close')}
             className="rounded-md p-1.5 text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-900"
           >
             <X size={18} />
@@ -58,12 +63,12 @@ export default function CartDrawer() {
         {items.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
             <ShoppingBag size={32} className="text-neutral-300" />
-            <p className="text-sm text-neutral-500">Your cart is empty.</p>
+            <p className="text-sm text-neutral-500">{t('cart.empty')}</p>
             <button
               onClick={() => goTo('/shop')}
               className="rounded-full bg-[#C53735] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#AE2F2D]"
             >
-              Continue shopping
+              {t('cart.continue')}
             </button>
           </div>
         ) : (
@@ -86,7 +91,7 @@ export default function CartDrawer() {
                       </div>
                       <button
                         onClick={() => removeItem(item.key)}
-                        aria-label={`Remove ${item.name}`}
+                        aria-label={`${t('custom.remove')} ${item.name}`}
                         className="rounded p-1 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-[#C53735]"
                       >
                         <Trash2 size={15} />
@@ -122,21 +127,21 @@ export default function CartDrawer() {
 
             <footer className="border-t border-neutral-200 px-5 py-4">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-neutral-500">Subtotal</span>
+                <span className="text-neutral-500">{t('cart.subtotal')}</span>
                 <span className="font-semibold text-neutral-900">{formatJOD(subtotal)}</span>
               </div>
-              <p className="mt-1 text-xs text-neutral-400">Free delivery in Amman &amp; Beirut.</p>
+              <p className="mt-1 text-xs text-neutral-400">{t('cart.freeDelivery')}</p>
               <button
                 onClick={() => goTo('/checkout')}
                 className="mt-3 w-full rounded-full bg-[#C53735] px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-[#AE2F2D]"
               >
-                Checkout
+                {t('cart.checkout')}
               </button>
               <button
                 onClick={() => goTo('/cart')}
                 className="mt-2 w-full rounded-full border border-neutral-300 px-5 py-2.5 text-sm font-medium text-neutral-700 transition-colors hover:border-neutral-900 hover:text-neutral-900"
               >
-                View cart
+                {t('cart.view')}
               </button>
             </footer>
           </>

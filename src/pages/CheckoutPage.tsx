@@ -6,6 +6,7 @@ import type { Fils } from '../lib/money'
 import { formatJOD, jod } from '../lib/money'
 import { repository } from '../data'
 import { useCart } from '../context/CartContext'
+import { useI18n } from '../lib/i18n'
 
 // Demo coupons. Each returns the discount (in fils) for a given subtotal.
 const COUPONS: Record<string, { label: string; compute: (subtotal: Fils) => Fils }> = {
@@ -17,6 +18,7 @@ const CITIES = ['Amman', 'Beirut']
 
 export default function CheckoutPage() {
   const { items, subtotal, clear } = useCart()
+  const { t } = useI18n()
 
   const [form, setForm] = useState({
     name: '',
@@ -46,7 +48,7 @@ export default function CheckoutPage() {
       setCouponError('')
     } else {
       setCoupon(null)
-      setCouponError('That code isn’t valid.')
+      setCouponError(t('checkout.couponInvalid'))
     }
   }
 
@@ -86,34 +88,33 @@ export default function CheckoutPage() {
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50">
           <Check size={28} className="text-emerald-600" />
         </div>
-        <h1 className="mt-5 text-2xl font-medium text-neutral-900">Thank you — order placed!</h1>
+        <h1 className="mt-5 text-2xl font-medium text-neutral-900">{t('checkout.thanks')}</h1>
         <p className="mt-2 text-sm text-neutral-500">
-          Your order reference is{' '}
-          <span className="font-semibold text-neutral-900">{placed.reference}</span>.
+          {t('checkout.ref', { ref: placed.reference })}
         </p>
-        <div className="mx-auto mt-6 max-w-sm rounded-2xl border border-neutral-200 bg-neutral-50 p-5 text-left text-sm">
+        <div className="mx-auto mt-6 max-w-sm rounded-2xl border border-neutral-200 bg-neutral-50 p-5 text-start text-sm">
           <div className="flex justify-between">
-            <span className="text-neutral-500">Total</span>
+            <span className="text-neutral-500">{t('checkout.total')}</span>
             <span className="font-semibold text-neutral-900">{formatJOD(placed.total)}</span>
           </div>
           <div className="mt-1 flex justify-between">
-            <span className="text-neutral-500">Payment</span>
+            <span className="text-neutral-500">{t('checkout.payment')}</span>
             <span className="text-neutral-900">
-              {placed.paymentMethod === 'cod' ? 'Cash on delivery' : 'Card'}
+              {placed.paymentMethod === 'cod' ? t('checkout.cod') : t('checkout.cardPaid')}
             </span>
           </div>
           <p className="mt-3 text-xs text-neutral-400">
             {placed.paymentMethod === 'cod'
-              ? `Please have ${formatJOD(placed.total)} ready for our courier.`
-              : 'Payment received.'}{' '}
-            Free delivery across Amman &amp; Beirut.
+              ? t('checkout.courier', { amount: formatJOD(placed.total) })
+              : t('checkout.received')}{' '}
+            {t('checkout.freeAcross')}
           </p>
         </div>
         <Link
           to="/shop"
           className="mt-7 inline-block rounded-full bg-[#C53735] px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-[#AE2F2D]"
         >
-          Continue shopping
+          {t('cart.continue')}
         </Link>
       </main>
     )
@@ -123,13 +124,13 @@ export default function CheckoutPage() {
   if (items.length === 0) {
     return (
       <main className="mx-auto max-w-2xl px-5 py-20 text-center">
-        <h1 className="text-2xl font-medium text-neutral-900">Your cart is empty</h1>
-        <p className="mt-2 text-sm text-neutral-500">Add a gift before checking out.</p>
+        <h1 className="text-2xl font-medium text-neutral-900">{t('checkout.emptyTitle')}</h1>
+        <p className="mt-2 text-sm text-neutral-500">{t('checkout.emptySub')}</p>
         <Link
           to="/shop"
           className="mt-6 inline-block rounded-full bg-[#C53735] px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-[#AE2F2D]"
         >
-          Browse the shop
+          {t('checkout.browse')}
         </Link>
       </main>
     )
@@ -138,19 +139,19 @@ export default function CheckoutPage() {
   // Checkout form ------------------------------------------------------------
   return (
     <main className="mx-auto max-w-6xl px-5 py-10 sm:py-14">
-      <h1 className="mb-8 text-3xl font-medium tracking-tight text-neutral-900">Checkout</h1>
+      <h1 className="mb-8 text-3xl font-medium tracking-tight text-neutral-900">{t('checkout.title')}</h1>
 
       <form onSubmit={handleSubmit} className="grid gap-8 lg:grid-cols-3">
         {/* Details */}
         <div className="space-y-8 lg:col-span-2">
           <section>
             <h2 className="mb-4 text-sm font-medium uppercase tracking-wide text-neutral-500">
-              Contact
+              {t('checkout.contact')}
             </h2>
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Full name" required value={form.name} onChange={(v) => update('name', v)} />
+              <Field label={t('checkout.name')} required value={form.name} onChange={(v) => update('name', v)} />
               <Field
-                label="Phone"
+                label={t('checkout.phone')}
                 type="tel"
                 required
                 value={form.phone}
@@ -158,7 +159,7 @@ export default function CheckoutPage() {
               />
               <div className="sm:col-span-2">
                 <Field
-                  label="Email (optional)"
+                  label={t('checkout.email')}
                   type="email"
                   value={form.email}
                   onChange={(v) => update('email', v)}
@@ -169,19 +170,19 @@ export default function CheckoutPage() {
 
           <section>
             <h2 className="mb-4 text-sm font-medium uppercase tracking-wide text-neutral-500">
-              Delivery
+              {t('checkout.delivery')}
             </h2>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="sm:col-span-2">
                 <Field
-                  label="Address"
+                  label={t('checkout.address')}
                   required
                   value={form.address}
                   onChange={(v) => update('address', v)}
                 />
               </div>
               <label className="block text-sm">
-                <span className="mb-1.5 block font-medium text-neutral-700">City</span>
+                <span className="mb-1.5 block font-medium text-neutral-700">{t('checkout.city')}</span>
                 <select
                   value={form.city}
                   onChange={(e) => update('city', e.target.value)}
@@ -189,14 +190,14 @@ export default function CheckoutPage() {
                 >
                   {CITIES.map((c) => (
                     <option key={c} value={c}>
-                      {c}
+                      {t(`city.${c}`)}
                     </option>
                   ))}
                 </select>
               </label>
               <div className="flex items-end">
                 <p className="rounded-lg bg-emerald-50 px-3 py-2.5 text-sm text-emerald-700">
-                  Free delivery in Amman &amp; Beirut
+                  {t('checkout.freeBadge')}
                 </p>
               </div>
             </div>
@@ -204,7 +205,7 @@ export default function CheckoutPage() {
 
           <section>
             <h2 className="mb-4 text-sm font-medium uppercase tracking-wide text-neutral-500">
-              Payment
+              {t('checkout.payment')}
             </h2>
             <div className="space-y-3">
               <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-neutral-300 px-4 py-3 has-[:checked]:border-[#C53735] has-[:checked]:bg-[#C53735]/5">
@@ -215,11 +216,11 @@ export default function CheckoutPage() {
                   onChange={() => setPayment('cod')}
                   className="accent-[#C53735]"
                 />
-                <span className="text-sm font-medium text-neutral-900">Cash on delivery</span>
+                <span className="text-sm font-medium text-neutral-900">{t('checkout.cod')}</span>
               </label>
               <label className="flex cursor-not-allowed items-center gap-3 rounded-lg border border-neutral-200 px-4 py-3 opacity-60">
                 <input type="radio" name="payment" disabled className="accent-[#C53735]" />
-                <span className="text-sm font-medium text-neutral-500">Card — coming soon</span>
+                <span className="text-sm font-medium text-neutral-500">{t('checkout.cardSoon')}</span>
               </label>
             </div>
           </section>
@@ -227,7 +228,7 @@ export default function CheckoutPage() {
 
         {/* Summary */}
         <aside className="h-fit rounded-2xl border border-neutral-200 bg-neutral-50 p-6">
-          <h2 className="text-sm font-medium text-neutral-900">Order summary</h2>
+          <h2 className="text-sm font-medium text-neutral-900">{t('checkout.summary')}</h2>
 
           <ul className="mt-4 space-y-3">
             {items.map((item) => (
@@ -247,7 +248,7 @@ export default function CheckoutPage() {
           {/* Coupon */}
           <div className="mt-5 border-t border-neutral-200 pt-4">
             <label htmlFor="coupon" className="mb-1.5 block text-xs font-medium text-neutral-500">
-              Coupon code
+              {t('checkout.coupon')}
             </label>
             <div className="flex gap-2">
               <input
@@ -262,34 +263,34 @@ export default function CheckoutPage() {
                 onClick={applyCoupon}
                 className="shrink-0 rounded-lg border border-neutral-300 px-3 py-2 text-sm font-medium text-neutral-700 transition-colors hover:border-neutral-900"
               >
-                Apply
+                {t('checkout.apply')}
               </button>
             </div>
             {couponError && <p className="mt-1.5 text-xs text-[#C53735]">{couponError}</p>}
             {coupon && (
               <p className="mt-1.5 inline-flex items-center gap-1 text-xs text-emerald-600">
-                <Tag size={12} /> {coupon} applied — {COUPONS[coupon].label}
+                <Tag size={12} /> {t('checkout.couponApplied', { code: coupon, label: COUPONS[coupon].label })}
               </p>
             )}
           </div>
 
           <dl className="mt-5 space-y-2 border-t border-neutral-200 pt-4 text-sm">
             <div className="flex justify-between">
-              <dt className="text-neutral-500">Subtotal</dt>
+              <dt className="text-neutral-500">{t('checkout.subtotal')}</dt>
               <dd className="font-medium text-neutral-900">{formatJOD(subtotal)}</dd>
             </div>
             {discount > 0 && (
               <div className="flex justify-between">
-                <dt className="text-neutral-500">Discount</dt>
+                <dt className="text-neutral-500">{t('checkout.discount')}</dt>
                 <dd className="font-medium text-emerald-600">−{formatJOD(discount)}</dd>
               </div>
             )}
             <div className="flex justify-between">
-              <dt className="text-neutral-500">Delivery</dt>
-              <dd className="font-medium text-emerald-600">Free</dd>
+              <dt className="text-neutral-500">{t('checkout.delivery')}</dt>
+              <dd className="font-medium text-emerald-600">{t('checkout.free')}</dd>
             </div>
             <div className="flex justify-between border-t border-neutral-200 pt-3 text-base">
-              <dt className="font-medium text-neutral-900">Total</dt>
+              <dt className="font-medium text-neutral-900">{t('checkout.total')}</dt>
               <dd className="font-semibold text-neutral-900">{formatJOD(total)}</dd>
             </div>
           </dl>
@@ -298,11 +299,9 @@ export default function CheckoutPage() {
             type="submit"
             className="mt-5 w-full rounded-full bg-[#C53735] px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-[#AE2F2D]"
           >
-            Place order
+            {t('checkout.place')}
           </button>
-          <p className="mt-2 text-center text-xs text-neutral-400">
-            You’ll pay on delivery — no card needed.
-          </p>
+          <p className="mt-2 text-center text-xs text-neutral-400">{t('checkout.payNote')}</p>
         </aside>
       </form>
     </main>

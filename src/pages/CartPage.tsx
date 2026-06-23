@@ -1,22 +1,24 @@
 import { Link } from 'react-router-dom'
 import { Minus, Plus, Trash2, ShoppingBag } from 'lucide-react'
 import { useCart } from '../context/CartContext'
+import { useI18n } from '../lib/i18n'
 import { formatJOD } from '../lib/money'
 
 export default function CartPage() {
   const { items, subtotal, updateQty, removeItem } = useCart()
+  const { t } = useI18n()
 
   if (items.length === 0) {
     return (
       <main className="mx-auto max-w-6xl px-5 py-20 text-center">
         <ShoppingBag size={36} className="mx-auto text-neutral-300" />
-        <h1 className="mt-4 text-2xl font-medium text-neutral-900">Your cart is empty</h1>
-        <p className="mt-2 text-sm text-neutral-500">Find something encouraging to share.</p>
+        <h1 className="mt-4 text-2xl font-medium text-neutral-900">{t('cart.emptyTitle')}</h1>
+        <p className="mt-2 text-sm text-neutral-500">{t('cart.emptySub')}</p>
         <Link
           to="/shop"
           className="mt-6 inline-block rounded-full bg-[#C53735] px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-[#AE2F2D]"
         >
-          Browse the shop
+          {t('cart.browse')}
         </Link>
       </main>
     )
@@ -24,7 +26,7 @@ export default function CartPage() {
 
   return (
     <main className="mx-auto max-w-6xl px-5 py-10 sm:py-14">
-      <h1 className="mb-8 text-3xl font-medium tracking-tight text-neutral-900">Your cart</h1>
+      <h1 className="mb-8 text-3xl font-medium tracking-tight text-neutral-900">{t('cart.title')}</h1>
 
       <div className="grid gap-8 lg:grid-cols-3">
         {/* Lines */}
@@ -43,11 +45,13 @@ export default function CartPage() {
                     {item.variantLabel && (
                       <p className="text-xs text-neutral-500">{item.variantLabel}</p>
                     )}
-                    <p className="mt-1 text-sm text-neutral-500">{formatJOD(item.unitPrice)} each</p>
+                    <p className="mt-1 text-sm text-neutral-500">
+                      {formatJOD(item.unitPrice)} {t('cart.each')}
+                    </p>
                   </div>
                   <button
                     onClick={() => removeItem(item.key)}
-                    aria-label={`Remove ${item.name}`}
+                    aria-label={`${t('custom.remove')} ${item.name}`}
                     className="rounded p-1.5 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-[#C53735]"
                   >
                     <Trash2 size={16} />
@@ -83,18 +87,18 @@ export default function CartPage() {
 
         {/* Summary */}
         <aside className="h-fit rounded-2xl border border-neutral-200 bg-neutral-50 p-6">
-          <h2 className="text-sm font-medium text-neutral-900">Order summary</h2>
+          <h2 className="text-sm font-medium text-neutral-900">{t('cart.summary')}</h2>
           <dl className="mt-4 space-y-2 text-sm">
             <div className="flex justify-between">
-              <dt className="text-neutral-500">Subtotal</dt>
+              <dt className="text-neutral-500">{t('cart.subtotal')}</dt>
               <dd className="font-medium text-neutral-900">{formatJOD(subtotal)}</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-neutral-500">Delivery</dt>
-              <dd className="font-medium text-emerald-600">Free</dd>
+              <dt className="text-neutral-500">{t('cart.delivery')}</dt>
+              <dd className="font-medium text-emerald-600">{t('cart.free')}</dd>
             </div>
             <div className="flex justify-between border-t border-neutral-200 pt-3 text-base">
-              <dt className="font-medium text-neutral-900">Total</dt>
+              <dt className="font-medium text-neutral-900">{t('cart.total')}</dt>
               <dd className="font-semibold text-neutral-900">{formatJOD(subtotal)}</dd>
             </div>
           </dl>
@@ -102,13 +106,13 @@ export default function CartPage() {
             to="/checkout"
             className="mt-5 block rounded-full bg-[#C53735] px-6 py-3 text-center text-sm font-medium text-white transition-colors hover:bg-[#AE2F2D]"
           >
-            Proceed to checkout
+            {t('cart.proceed')}
           </Link>
           <Link
             to="/shop"
             className="mt-2 block text-center text-sm text-neutral-500 transition-colors hover:text-neutral-900"
           >
-            Continue shopping
+            {t('cart.continue')}
           </Link>
         </aside>
       </div>

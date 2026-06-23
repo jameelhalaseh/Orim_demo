@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { I18nProvider } from './lib/i18n'
 import { CartProvider } from './context/CartContext'
 import PublicLayout from './components/PublicLayout'
 import HomePage from './pages/HomePage'
@@ -16,8 +17,9 @@ import BazaarPage from './pages/admin/BazaarPage'
 export default function App() {
   return (
     <BrowserRouter>
-      <CartProvider>
-        <Routes>
+      <I18nProvider>
+        <CartProvider>
+          <Routes>
           {/* Hero landing (full-bleed, its own nav) */}
           <Route path="/" element={<HomePage />} />
 
@@ -41,8 +43,9 @@ export default function App() {
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </CartProvider>
+          </Routes>
+        </CartProvider>
+      </I18nProvider>
     </BrowserRouter>
   )
 }
