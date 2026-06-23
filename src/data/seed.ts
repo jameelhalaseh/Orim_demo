@@ -121,6 +121,20 @@ const SEED_ORDERS: SeedOrderSpec[] = [
   { at: '2026-06-23T14:35:00+03:00', channel: 'online', payment: 'cod', status: 'pending', lines: [{ p: 'tee-faith-classic', v: 'tee-faith-sd-l', q: 1 }] },
 ]
 
+// Stock physically taken to the bazaar stall this morning and not yet sold —
+// gives the POS live inventory out of the box. Transfers preserve product
+// totals, so no warehouse/total figure on the admin pages changes.
+const STOCK_AT = '2026-06-23T08:00:00+03:00'
+
+const BAZAAR_STOCKING: SeedLine[] = [
+  { p: 'charm-olivewood-cross', q: 8 },
+  { p: 'home-mug-blessed', q: 6 },
+  { p: 'book-daily-encouragement', q: 5 },
+  { p: 'bottle-bestill-steel', q: 4 },
+  { p: 'tee-faith-classic', v: 'tee-faith-wh-l', q: 5 },
+  { p: 'home-tote-olive', q: 6 },
+]
+
 function findCatalog(id: string) {
   const product = CATALOG.find((c) => c.id === id)
   if (!product) throw new Error(`seed: unknown product ${id}`)
@@ -236,5 +250,43 @@ export function seedActivity(): { orders: Order[]; movements: StockMovement[] } 
     })
   })
 
-  return { orders, movements: [...transferMovements, ...saleMovements] }
+  // Today's bazaar stocking (kept separate so it isn't drawn down by past sales).
+  const stockingMovements: StockMovement[] = []
+  let stN = 0
+  for (const s of BAZAAR_STOCKING) {
+    const product = findCatalog(s.p)
+    let sku = product.sku
+    if (s.v) {
+      const variant = product.variants?.find((v) => v.id === s.v)
+      if (!variant) throw new Error(`seed: unknown variant ${s.v}`)
+      sku = variant.sku
+    }
+    const transferId = `seed-stock-${++stN}`
+    stockingMovements.push({
+      id: nextId(),
+      productId: product.id,
+      variantId: s.v,
+      sku,
+      reason: 'transfer',
+      quantity: -s.q,
+      location: 'warehouse',
+      transferId,
+      note: 'Bazaar stock for today',
+      at: STOCK_AT,
+    })
+    stockingMovements.push({
+      id: nextId(),
+      productId: product.id,
+      variantId: s.v,
+      sku,
+      reason: 'transfer',
+      quantity: s.q,
+      location: 'bazaar',
+      transferId,
+      note: 'Bazaar stock for today',
+      at: STOCK_AT,
+    })
+  }
+
+  return { orders, movements: [...transferMovements, ...stockingMovements, ...saleMovements] }
 }
