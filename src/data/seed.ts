@@ -103,12 +103,14 @@ interface SeedOrderSpec {
   payment: PaymentMethod
   status: OrderStatus
   lines: SeedLine[]
+  coupon?: string
+  discountPct?: number
 }
 
 const SEED_ORDERS: SeedOrderSpec[] = [
   { at: '2026-06-17T10:15:00+03:00', channel: 'online', payment: 'cod', status: 'fulfilled', lines: [{ p: 'book-daily-encouragement', q: 1 }, { p: 'charm-olivewood-cross', q: 2 }] },
   { at: '2026-06-17T16:40:00+03:00', channel: 'bazaar', payment: 'cash', status: 'fulfilled', lines: [{ p: 'home-mug-blessed', q: 3 }] },
-  { at: '2026-06-18T11:05:00+03:00', channel: 'online', payment: 'card', status: 'paid', lines: [{ p: 'bottle-bestill-steel', q: 1 }, { p: 'home-tote-olive', q: 1 }] },
+  { at: '2026-06-18T11:05:00+03:00', channel: 'online', payment: 'card', status: 'paid', coupon: 'WELCOME10', discountPct: 10, lines: [{ p: 'bottle-bestill-steel', q: 1 }, { p: 'home-tote-olive', q: 1 }] },
   { at: '2026-06-19T13:20:00+03:00', channel: 'online', payment: 'cod', status: 'fulfilled', lines: [{ p: 'tee-faith-classic', v: 'tee-faith-wh-m', q: 2 }] },
   { at: '2026-06-19T18:00:00+03:00', channel: 'bazaar', payment: 'cash', status: 'fulfilled', lines: [{ p: 'charm-olivewood-cross', q: 1 }, { p: 'home-mug-blessed', q: 1 }] },
   { at: '2026-06-20T09:50:00+03:00', channel: 'online', payment: 'cod', status: 'pending', lines: [{ p: 'charm-silver-cross-pendant', q: 1 }] },
@@ -182,6 +184,8 @@ export function seedActivity(): { orders: Order[]; movements: StockMovement[] } 
     })
 
     const subtotal = lines.reduce((s, l) => s + l.lineTotal, 0)
+    const discount = spec.discountPct ? Math.round((subtotal * spec.discountPct) / 100) : 0
+    const total = Math.max(0, subtotal - discount)
     orders.push({
       id,
       reference,
@@ -189,9 +193,10 @@ export function seedActivity(): { orders: Order[]; movements: StockMovement[] } 
       location,
       lines,
       subtotal,
-      discount: 0,
+      discount,
       deliveryFee: 0,
-      total: subtotal,
+      total,
+      couponCode: spec.coupon,
       paymentMethod: spec.payment,
       status: spec.status,
       createdAt: spec.at,

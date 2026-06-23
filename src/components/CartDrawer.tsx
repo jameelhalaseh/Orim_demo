@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { Minus, Plus, ShoppingBag, Trash2, X } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import { useI18n } from '../lib/i18n'
@@ -9,6 +9,7 @@ export default function CartDrawer() {
   const { items, isOpen, closeCart, subtotal, count, updateQty, removeItem } = useCart()
   const { t } = useI18n()
   const navigate = useNavigate()
+  const { pathname } = useLocation()
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -17,6 +18,13 @@ export default function CartDrawer() {
     if (isOpen) document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
   }, [isOpen, closeCart])
+
+  // Close the drawer whenever the route changes (e.g. tapping a product link
+  // while it's open). Depends only on pathname so it doesn't fire every render.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    closeCart()
+  }, [pathname])
 
   function goTo(path: string) {
     closeCart()
