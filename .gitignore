@@ -16,6 +16,7 @@ pnpm-debug.log*
 # secrets / environment
 .env
 .env.*
+!.env.example
 
 # editor / OS
 .vscode/*
